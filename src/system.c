@@ -194,7 +194,6 @@ void UpdateAccountInformation(struct User u) {
       cr.amount,
       cr.accountType);
   }
-
   fclose(originalFile);
   fclose(tempFile);
 
@@ -206,9 +205,9 @@ void UpdateAccountInformation(struct User u) {
 
   remove(RECORDS); // Delete the original file
   rename("temp.txt", RECORDS); // Rename the temporary file to the original filename
-
   success(u);
 }
+
 
 void CheckTheDetailsOfExistingAccounts(struct User u) {
   int accountNbr;
@@ -221,13 +220,32 @@ void CheckTheDetailsOfExistingAccounts(struct User u) {
   FILE * originalFile = fopen(RECORDS, "r");
 
   bool recordUpdated = false;
-
-  while (getAccountFromFile(originalFile, userName, & cr)) {
+while (getAccountFromFile(originalFile, userName, &cr)) {
     if (strcmp(userName, u.name) == 0 && cr.accountNbr == accountNbr) {
-      printf("Acount number:%d\nDeposit Date:%d/%d/%d\ncountry:%s\nphone number:%d\nAmount deposite:$%lf\nType of Account: %s", cr.accountNbr, cr.deposit.day, cr.deposit.month, cr.deposit.year, cr.country, cr.phone, cr.amount, cr.accountType);
-   recordUpdated = true;
+        printf("Account number: %d\nDeposit Date: %d/%d/%d\nCountry: %s\nPhone number: %d\nAmount deposited: $%.2lf\nType of Account: %s\n",
+               cr.accountNbr,
+               cr.deposit.day,
+               cr.deposit.month,
+               cr.deposit.year,
+               cr.country,
+               cr.phone,
+               cr.amount,
+               cr.accountType);
+        recordUpdated = true;
+        double interest = 0.0;
+     if (strcmp(cr.accountType, "current") == 0) {
+    printf("You will not get interest because the account is of type 'current'.\n");
+} else if (cr.accountType == "savings") {
+    printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.07), cr.deposit.day);
+} else if (strcmp(cr.accountType, "fixed01") == 0) {
+    printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.04), cr.deposit.day);
+} else if (strcmp(cr.accountType, "fixed02") == 0) {
+    printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.05), cr.deposit.day);
+} else if (strcmp(cr.accountType, "fixed03") == 0) {
+    printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.08), cr.deposit.day);
+}
     }
-  }
+}
 
   fclose(originalFile);
 
@@ -448,4 +466,49 @@ void TransferOwner(struct User u) {
   rename("temp.txt", RECORDS); // Rename the temporary file to the original filename
 
   success(u);
+}
+
+
+
+void Registration(  struct User MyUser) {
+    int id;
+    char name[50];
+    char password[50];
+
+invalid:
+    printf("Enter your id: \n");
+    scanf("%d", &id);
+
+    printf("Enter your Name: \n");
+    scanf("%s", name);
+
+    FILE* usersFile = fopen("./data/users.txt", "r");
+    struct User newUser;
+
+    while (getUsers(usersFile, &newUser)) {
+        if (strcmp(newUser.name, name) == 0 && id == newUser.id) {
+            printf("This user already exists\n");
+            fclose(usersFile);
+            goto invalid;
+        }
+    }
+
+    fclose(usersFile);
+
+    printf("Enter your password: \n");
+    scanf("%s", password);
+
+    MyUser.id = id;
+    strcpy(MyUser.name, name);
+    strcpy(MyUser.password, password);
+
+    FILE* UserFile = fopen("./data/users.txt", "a");
+    saveUsersToFile(UserFile, MyUser);
+    fclose(UserFile);
+
+    return MyUser;
+}
+
+void saveUsersToFile(FILE* ptr, struct User u) {
+    fprintf(ptr, "%d %s %s\n", u.id, u.name, u.password);
 }
