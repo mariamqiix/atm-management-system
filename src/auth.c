@@ -78,7 +78,7 @@ invalid:
     struct User newUser;
 
     while (getUsers(usersFile, &newUser)) {
-        if (strcmp(newUser.name, name) == 0 && id == newUser.id) {
+        if (strcmp(newUser.name, name) == 0) {
             printf("This user already exists\n");
             fclose(usersFile);
             goto invalid;
