@@ -37,10 +37,8 @@ void saveAccountToFile(FILE * ptr, struct User u, struct Record r) {
 void stayOrReturn(int notGood, void f(struct User u), struct User u) {
   int option;
   if (notGood == 0) {
-    system("clear");
-    printf("\n✖ Record not found!!\n");
     invalid:
-      printf("\nEnter 0 to try again, 1 to return to main menu and 2 to exit:");
+    printf("\nEnter 0 to try again, 1 to return to main menu and 2 to exit:");
     scanf("%d", & option);
     if (option == 0)
       f(u);
@@ -200,7 +198,7 @@ void UpdateAccountInformation(struct User u) {
   if (!recordUpdated) {
     remove("temp.txt"); // Delete the temporary file
     printf("Account number not found.\n");
-    mainMenu(u);
+    stayOrReturn(0,UpdateAccountInformation,u);
   }
 
   remove(RECORDS); // Delete the original file
@@ -241,13 +239,13 @@ void CheckTheDetailsOfExistingAccounts(struct User u) {
       if (strcmp(cr.accountType, current) == 0) {
         printf("You will not get interest because the account is of type 'current'.\n");
       } else if (strcmp(cr.accountType, saving) == 0) {
-        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.07), cr.deposit.day);
+        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * (0.07/12)), cr.deposit.day);
       } else if (strcmp(cr.accountType, fixed01) == 0) {
-        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.04), cr.deposit.day);
+        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * (0.04)), cr.deposit.day);
       } else if (strcmp(cr.accountType, fixed02) == 0) {
-        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.05), cr.deposit.day);
+        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * (0.05*2)), cr.deposit.day);
       } else if (strcmp(cr.accountType, fixed03) == 0) {
-        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * 0.08), cr.deposit.day);
+        printf("You will get $%.2lf interest on day %d of every month.\n", (cr.amount * (0.08*3)), cr.deposit.day);
       }
 
     }
@@ -257,7 +255,7 @@ void CheckTheDetailsOfExistingAccounts(struct User u) {
 
   if (!recordUpdated) {
     printf("Account number not found.\n");
-    mainMenu(u);
+    stayOrReturn(0,CheckTheDetailsOfExistingAccounts,u);
   }
 
   success(u);
@@ -280,9 +278,20 @@ void MakeTransaction(struct User u) {
   while (getAccountFromFile(originalFile, userName, & cr)) {
     struct User oldUser;
     if (strcmp(userName, u.name) == 0 && cr.accountNbr == accountNbr) {
+      
+            char fixed01[10] = "fixed01\0";
+      char fixed02[10] = "fixed02\0";
+      char fixed03[10] = "fixed03\0";
+
+      if ((strcmp(cr.accountType, fixed01) == 0) || (strcmp(cr.accountType, fixed02) == 0)  || (strcmp(cr.accountType, fixed03) == 0) ) {
+    printf("it is not possible to withdraw or deposit for \"fixed\" accounts");
+    stayOrReturn(0,MakeTransaction,u);
+
+      }
       printf("Do you want to?\n1-> Withdraw\n2-> Deposite\n\nEnter your choice:\n");
       int information;
       scanf("%d", & information);
+
 
       switch (information) {
       case 1:
@@ -328,7 +337,7 @@ void MakeTransaction(struct User u) {
   if (!recordUpdated) {
     remove("temp.txt"); // Delete the temporary file
     printf("Account number not found.\n");
-    mainMenu(u);
+    stayOrReturn(0,MakeTransaction,u);
   }
 
   remove(RECORDS); // Delete the original file
@@ -372,7 +381,7 @@ void RemoveExistingAccount(struct User u) {
   if (!recordUpdated) {
     remove("temp.txt"); // Delete the temporary file
     printf("Account number not found.\n");
-    mainMenu(u);
+    stayOrReturn(0,RemoveExistingAccount,u);
   }
 
   remove(RECORDS); // Delete the original file
@@ -464,7 +473,7 @@ void TransferOwner(struct User u) {
   if (!recordUpdated) {
     remove("temp.txt"); // Delete the temporary file
     printf("Account number not found.\n");
-    mainMenu(u);
+    stayOrReturn(0,TransferOwner,u);
   }
 
   remove(RECORDS); // Delete the original file
