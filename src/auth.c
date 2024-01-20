@@ -1,5 +1,6 @@
 #include <termios.h>
 #include "header.h"
+#include "syslog.h"
 
 char *USERS = "./data/users.txt";
 
@@ -44,7 +45,9 @@ const char *getPassword(struct User u)
         exit(1);
     }
 
-    while (fscanf(fp, "%s %s", userChecker.name, userChecker.password) != EOF)
+    FILE * usersFile = fopen("./data/users.txt", "r");
+
+    while (getUsers(usersFile,&userChecker))
     {
         if (strcmp(userChecker.name, u.name) == 0)
         {
@@ -56,4 +59,44 @@ const char *getPassword(struct User u)
 
     fclose(fp);
     return "no user found";
+}
+
+
+void Registration(  struct User MyUser) {
+    int id;
+    char name[50];
+    char password[50];
+
+invalid:
+    printf("Enter your id: \n");
+    scanf("%d", &id);
+
+    printf("Enter your Name: \n");
+    scanf("%s", name);
+
+    FILE* usersFile = fopen("./data/users.txt", "r");
+    struct User newUser;
+
+    while (getUsers(usersFile, &newUser)) {
+        if (strcmp(newUser.name, name) == 0 && id == newUser.id) {
+            printf("This user already exists\n");
+            fclose(usersFile);
+            goto invalid;
+        }
+    }
+
+    fclose(usersFile);
+
+    printf("Enter your password: \n");
+    scanf("%s", password);
+
+    MyUser.id = id;
+    strcpy(MyUser.name, name);
+    strcpy(MyUser.password, password);
+
+    FILE* UserFile = fopen("./data/users.txt", "a");
+    saveUsersToFile(UserFile, MyUser);
+    fclose(UserFile);
+
+    return MyUser;
 }
