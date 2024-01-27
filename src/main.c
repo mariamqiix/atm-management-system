@@ -1,4 +1,6 @@
 #include "header.h"
+#include <stdio.h>
+#include <signal.h>
 
 void mainMenu(struct User u)
 {
@@ -96,11 +98,31 @@ void initMenu(struct User *u)
     }
 };
 
+
+
+void handle_ctrl_c(int signum) {
+    printf("\nCTRL+C pressed. Exiting...\n");
+    remove("temp.txt"); // Delete the temporary file
+    fclose("./data/users.txt");
+    fclose("./data/records.txt");
+    // Add your cleanup or exit code here
+    // For example, you can close files, free memory, etc.
+    // Then exit the program
+    exit(signum);
+}
+
+
+
 int main()
 {
+
+        signal(SIGINT, handle_ctrl_c);
+    while (1) {
     struct User u;
-    
     initMenu(&u);
     mainMenu(u);
+    }
+
     return 0;
 }
+
